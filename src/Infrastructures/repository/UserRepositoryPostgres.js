@@ -21,6 +21,20 @@ class UserRepositoryPostgres extends UserRepository {
       throw new InvariantError('username tidak tersedia');
     }
   }
+
+  async addUser(registerUser) {
+    const { username, password, fullname } = registerUser;
+    const id = `user-${this._idGenerator()}`;
+
+    const query = {
+      text: 'INSERT INTO users VALUES($1, $2, $3, $4) RETURNING id, username, fullname',
+      values: [id, username, password, fullname],
+    };
+
+    const result = await this._pool.query(query);
+
+    return new RegisteredUser({ ...result.rows[0] });
+  }
 }
 
 module.exports = UserRepositoryPostgres;
